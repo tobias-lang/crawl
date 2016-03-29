@@ -5,6 +5,8 @@ import urlparse
 import codecs
 import numpy as np
 
+# work in progress
+
 
 class ArticleParser(HTMLParser):
 
