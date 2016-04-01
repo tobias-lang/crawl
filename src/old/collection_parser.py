@@ -1,17 +1,13 @@
 import traceback
-from HTMLParser import HTMLParser
-from urllib2 import urlopen
-import urlparse
 import codecs
-import numpy as np
 
-import article_parser
+import src.parse.article_parser
 
 
 class CollectionParser():
 
-    def __init__(self, article_parser=article_parser.ArticleParser()):
-        self.article_parser = article_parser
+    def __init__(self, article_parser=src.parse.article_parser.ArticleParser()):
+        self.article_parser = src.parse.article_parser
 
 
     def get_filelist(self, dir, maxNumber=None):

@@ -5,8 +5,10 @@ import urlparse
 import codecs
 import numpy as np
 
-# work in progress
 
+# CREDIT
+# Mostly taken from:
+# https://github.com/swapnil-k/python_programs/blob/master/crawler_py3.py
 
 class ArticleParser(HTMLParser):
 
@@ -15,16 +17,9 @@ class ArticleParser(HTMLParser):
         self.reset()
 
 
-    def reset(self):
-        HTMLParser.reset(self)
-        self.in_article_section = False
-        self.recording = 0
-        self.contents = []
-
-
+    # OVERRIDE
     def handle_starttag(self, tag, attrs):
         if tag == 'section':
-            # print "guenther ist da"
             for (key, value) in attrs:
                 if key == 'class' and value == "article-page":
                     self.in_article_section = True
@@ -32,11 +27,45 @@ class ArticleParser(HTMLParser):
             self.recording += 1
 
 
+    # OVERRIDE
     def handle_endtag(self, tag):
         if tag == "section" and self.in_article_section:
             self.in_article_section = False
         if tag == 'p' and self.recording:
             self.recording -= 1
+
+
+    # OVERRIDE
+    def process_contents(self, data):
+        splits = data.split("\n")
+        splits = [s.strip() for s in splits]
+        splits = map(lambda x: self.process_contents__additional(x), splits)
+        splits = filter(lambda x: self.is_good_data_chunck(x), splits)
+        answer = ""
+        if len(splits):
+            answer = " ".join(splits)
+        return answer
+
+
+    # OVERRIDE
+    def process_contents__additional(self, data_chunk):
+        return data_chunk
+
+
+    # OVERRIDE
+    def is_good_data_chunck(self, data_chunk):
+        if ArticleParser.contains_code(data_chunk):
+            return False
+        if len(data_chunk) < 10:
+            return False
+        return True
+
+
+    def reset(self):
+        HTMLParser.reset(self)
+        self.in_article_section = False
+        self.recording = 0
+        self.contents = []
 
 
     def handle_data(self, data):
@@ -49,32 +78,6 @@ class ArticleParser(HTMLParser):
     def getContents(self):
         all_contents = " ".join(self.contents)
         return all_contents
-
-
-    # Overridable
-    def process_contents(self, data):
-        splits = data.split("\n")
-        splits = [s.strip() for s in splits]
-        splits = map(lambda x: self.process_contents__additional(x), splits)
-        splits = filter(lambda x: self.is_good_data_chunck(x), splits)
-        answer = ""
-        if len(splits):
-            answer = " ".join(splits)
-        return answer
-
-
-    # Overridable
-    def process_contents__additional(self, data_chunk):
-        return data_chunk
-
-
-    # Overridable
-    def is_good_data_chunck(self, data_chunk):
-        if ArticleParser.contains_code(data_chunk):
-            return False
-        if len(data_chunk) < 10:
-            return False
-        return True
 
 
     @staticmethod
