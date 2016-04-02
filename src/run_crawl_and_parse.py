@@ -33,7 +33,7 @@ def write_website(data, filename):
         print(traceback.format_exc())
 
 
-def spider(domain, article_parser, maxPages, dir):
+def spider(domain, article_parser, maxPages, outPath):
     pagesVisited = set()
     pagesToVisit = [domain]
 
@@ -41,6 +41,8 @@ def spider(domain, article_parser, maxPages, dir):
     numUsed = 0  # different from numVisited (as parsing can fail)
 
     titles = []
+    
+    f = open(outPath, "w")
 
     while numVisited < maxPages and pagesToVisit != []:
         url = pagesToVisit[0]
@@ -67,11 +69,14 @@ def spider(domain, article_parser, maxPages, dir):
                 numUsed += 1
         except Exception as e:
             print(traceback.format_exc())
-
-    f = open("titles.txt", "w")
-    for t in titles:
-        # s = unicode(t).encode('utf8')
-        f.write(t + "\n")
+            
+        if len(titles) >= 100:
+	  for t in titles:
+	    # s = unicode(t).encode('utf8')
+	    f.write(t + "\n")
+	  f.flush()
+	  titles = []
+    
     f.close()
 
     print titles
@@ -81,8 +86,8 @@ def spider(domain, article_parser, maxPages, dir):
 
 if __name__ == '__main__':
     domain = "http://www.zeit.de"
-    maxPages = 100
-    outDir = "../out/"
+    maxPages = 1000
+    outPath = "../out/titles.txt"
     article_parser = parse.impl.zeit_title_parser.TitleParser()
 
     # if len(sys.argv) < 4:
@@ -95,7 +100,7 @@ if __name__ == '__main__':
 
     print "domain,", domain
     print "maxPages,", maxPages
-    print "outDir", outDir
+    print "outPath", outPath
 
-    contents = spider(domain, article_parser, maxPages, outDir)
+    contents = spider(domain, article_parser, maxPages, outPath)
 
